@@ -116,3 +116,101 @@ Once locked, the Phase-Locked Loop (PLL) reveals significant frequency jitter an
 * **Formatting:** Included a "Blockquote" for the mission objective to make it stand out as the primary goal.
 
 **Would you like me to add a "How to Run" section with example Python code for generating these types of plots?**
+
+# 🛰️ Stage II: Carrier & Timing Recovery
+
+Following successful signal detection, **Stage II** focuses on the synchronization and conversion of the high-frequency carrier into a usable baseband signal. This stage is critical for correcting the Doppler-induced "wobble" and ensuring the symbol clock is perfectly aligned for data extraction.
+
+---
+
+## 🎯 Objectives
+
+* **Carrier Locking:** Synchronize with the drifting, non-linear carrier frequency.
+* **Baseband Conversion:** Down-convert the signal to $0 \text{ Hz}$ (Complex Baseband).
+* **Clock Recovery:** Extract the symbol clock to ensure samples are taken at the optimal point of the pulse.
+
+---
+
+## 📂 Implementation Modules
+
+The following core scripts handle the mathematical heavy lifting for Stage II:
+
+| File | Purpose |
+| :--- | :--- |
+| `Costas_loop.py` | Implements a Costas Loop to track and lock the phase of the suppressed carrier. |
+| `Carrier_Freq_Tracking.py` | Actively compensates for the non-linear frequency drift (e.g., Jupiter-induced Doppler). |
+| `Baseband_Signal0Hz.py` | Performs the final down-conversion to shift the signal center to DC. |
+| `Flattened_Baseband.py` | Normalizes and conditions the baseband signal for symbol extraction. |
+
+---
+
+## 🧠 Technical Theory
+
+### 1. Phase-Locked Loops (PLL) & Costas Loops
+To "lock" onto a signal that is moving, we use a **Costas Loop**. Unlike a standard PLL, a Costas loop is specifically designed to recover the carrier from modulated signals (like BPSK or QPSK) where the carrier itself is not explicitly transmitted. 
+
+It works by minimizing the error between the received phase and a Local Oscillator (LO) using a phase detector, loop filter, and Voltage-Controlled Oscillator (VCO).
+
+### 2. The Doppler "Wobble"
+In deep-space communications, the relative velocity between the probe and the Earth station causes a significant **Doppler Shift**. 
+* **The Problem:** The carrier frequency is not a straight line; it curves based on orbital mechanics.
+* **The Solution:** The `Carrier_Freq_Tracking.py` module applies a dynamic offset to "flatten" this curve, allowing the receiver to stay in-lock without losing the signal.
+
+### 3. Symbol Timing Recovery
+Once the signal is at baseband, we must decide *when* to sample it. Since the transmitter and receiver clocks are never perfectly synced, we use a **Clock Recovery Algorithm** (such as Gardner or Mueller-Müller) to find the "eye-opening"—the moment of maximum signal clarity.
+
+---
+
+## 🚀 Execution Flow
+
+1. **Input:** Raw IF (Intermediate Frequency) signal from Stage I.
+2. **Tracking:** Run `Carrier_Freq_Tracking.py` to calculate the drift profile.
+3. **Locking:** Utilize `Costas_loop.py` to achieve phase-lock.
+4. **Output:** Generate `Flattened_Baseband.py` data for final bit-decoding.
+
+---
+# 🛰️ Stage II: Advanced Synchronization & optimal Baseband Conversion
+
+Building on initial detection and carrier frequency lock, the subsequent focus is on precise symbol clock alignment, frequency centering, and active phase synchronization. These processes eliminate residual Doppler jitter, achieving high-fidelity, sample-perfect alignment.
+
+---
+
+## 2.3 Precise Voyager Symbol Clock Extraction
+
+Identifying and locking onto the exact symbol rate is paramount for error-free sampling. Deep-space probes typically include a clock-harmonic tone within their modulation to allow for high-precision synchronization.
+
+![Final Symbol Clock Detection Spectrum](image4.jpg)
+*Figure 6: Magnitude Spectrum. The dominant spike at 10,000 Hz defines the definitive symbol rate of 10.0 kilobits per second (Kbps). Locking onto this precise tone ensures bit timing is synchronized with deep-space probe transmission.*
+
+---
+
+## 2.4 Down-conversion to Zero-Frequency Complex Baseband (DC)
+
+Following active carrier tracking, the high-frequency intermediate signal is shifted to complex baseband, making the center frequency exactly $0.0\text{ Hz}$. This step is critical for efficient, optimal digital signal processing, simplifying subsequent filtering and decoding.
+
+![Gain vs Frequency PSD of Shifted Signal](image5.jpg)
+*Figure 7: Power Spectral Density (PSD) plot. The perfect centering of the powerful signal spike at $0.00\text{ Hz}$ across a +/- 1 MHz bandwidth verifies complete carrier removal and frequency lock, ensuring optimal system performance.*
+
+---
+
+## 2.5 Phase & Timing Recovery (Costas & Early-Late Locks)
+
+Simultaneous phase lock (Costas Loop) and optimal bit boundary detection (Early-Late Gate) are achieved through nested feedback loops. This provides robust protection against phase noise and timing jitter.
+
+![Costas & Clock Lock Diagnostics](image6.jpg)
+*Figure 8: Performance verification. Top Panel (Costas Loop): The two distinct and tight constellations at (-1, 0) and (+1, 0) prove a perfect BPSK phase-lock, effectively unwrapping the data from any residual carrier phase. Bottom Panel (Early-Late Gate): The red grid lines of the clock-recovery system are perfectly aligned with the signal peaks and bit-decision points (samples-per-symbol metric, SPS=200.03), confirming optimal symbol synchronization.*
+
+---
+
+## 🛠️ Stage II: Key Synchronization Metrics
+
+| Recovery | Parameters / Results |
+| :--- | :--- |
+| **Symbol Rate** | Extracted from 10.00 kHz tone. |
+| **Baseband Offset** | Extracted and removed by Costas Loop. |
+| **Frequency Lock** | Centered precisely at 0.00 Hz. |
+| **Sampling Point** | Aligned at optimal eye-opening. |
+| **SPS** (Samples per Symbol) | **200.03** |
+
+---
+
