@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
 
-# 1. CONFIGURATION & DATA LOADING 
+# --- 1. CONFIGURATION & DATA LOADING ---
 fs = 2.0e6
 filename = "telemetry_baseband.bin"
 print("Loading data...")
@@ -10,7 +10,7 @@ data = np.memmap(filename, dtype=np.complex64, mode='r')
 # Process 4.5 seconds to ensure the loop is fully locked and stable
 signal = data[0:int(4.5 * fs)] 
 
-# 2. COARSE SHIFT & PRE-FILTER 
+# --- 2. COARSE SHIFT & PRE-FILTER ---
 print("Applying coarse frequency shift and pre-filter...")
 t = np.arange(len(signal)) / fs
 coarse_nco = np.exp(-1j * 2 * np.pi * 432999.0 * t)
@@ -22,9 +22,10 @@ def butter_lowpass(cutoff, fs, order=5):
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return lfilter(b, a, coarse_baseband)
 
+# Squeeze the bandwidth to remove deep space noise
 clean_signal = butter_lowpass(15000, fs)
 
-# 3. COSTAS LOOP (FINE PHASE LOCK)
+# --- 3. COSTAS LOOP (FINE PHASE LOCK) ---
 print("Engaging Costas Loop for absolute phase alignment...")
 phase_est = 0.0
 freq_est = 0.0 
@@ -45,15 +46,17 @@ for i in range(len(clean_signal)):
     freq_est += (beta * error * fs / (2 * np.pi))
     phase_est %= (2 * np.pi)
 
-# 4. THE MATCHED FILTER 
+# --- 4. THE MATCHED FILTER ---
 print("Applying Matched Filter (200-sample integration)...")
 symbol_rate = 10000.0 
-sps = int(fs / symbol_rate)
+sps = int(fs / symbol_rate) # 200 samples per symbol
 
+# Averages the energy of the bit to kill the remaining noise
 kernel = np.ones(sps) / sps
 clean_real = np.convolve(np.real(baseband_out), kernel, mode='same')
 
-# 5. VISUALIZATION SLICE 
+# --- 5. VISUALIZATION SLICE ---
+# Look at 40 symbols, starting 4 seconds in (where the loop is rock solid)
 start_sample = int(4.0 * fs)
 num_symbols = 40
 end_sample = start_sample + (num_symbols * sps)
@@ -61,25 +64,28 @@ end_sample = start_sample + (num_symbols * sps)
 # Extract just the slice we want to look at
 plot_slice = clean_real[start_sample:end_sample]
 
-# 6. PLOTTING THE "EYE" ALIGNMENT
+# --- 6. PLOTTING THE "EYE" ALIGNMENT ---
 print("Generating Timing Verification Plot...")
 plt.figure(figsize=(15, 6))
 
-# Plot the filtered signal 
+# Plot the filtered signal (The "Cyan Wave")
 plt.plot(plot_slice, color='cyan', linewidth=2.5, label='Filtered BPSK Baseband')
 plt.axhline(0, color='white', linestyle='-', alpha=0.5)
 
-# Plot the Sampling Points 
+# Plot the Sampling Points (The "Red Dotted Lines" and "Yellow Dots")
 for i in range(num_symbols):
+    # Calculate where the sample should drop (offset by sps//2 to hit the peak)
     sample_point = (i * sps) + (sps // 2)
     plt.axvline(sample_point, color='red', linestyle='--', alpha=0.6)
-
+    
+    # Yellow dot exactly where the python array will sample the binary value
     plt.plot(sample_point, plot_slice[sample_point], 'yo', markersize=6)
 
 plt.title("Verification: Symbol Sampling Alignment (SPS = 200)", fontsize=16)
 plt.xlabel("Samples (Relative to slice start)", fontsize=12)
 plt.ylabel("Amplitude (Binary 1 -> Positive, Binary 0 -> Negative)", fontsize=12)
 
+# Set background to dark for better visibility
 plt.gca().set_facecolor('#111111')
 plt.grid(color='white', alpha=0.1)
 plt.legend(loc='upper right')
