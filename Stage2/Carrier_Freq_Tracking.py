@@ -10,7 +10,7 @@ def pll_carrier_recovery(iq_samples, fs, initial_freq_guess):
     
     # Loop Parameters 
     damping_factor = 0.707
-    bandwidth = 0.0005 # Wide enough to catch the Jupiter drift
+    bandwidth = 0.0005 
     
     denom = (1.0 + 2.0 * damping_factor * bandwidth + bandwidth**2)
     alpha = (4.0 * damping_factor * bandwidth) / denom
