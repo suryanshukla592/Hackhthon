@@ -86,7 +86,7 @@ By applying power spectral density (PSD) averaging, we collapse the noise and is
 
 ### 3. Characterizing Frequency Instability
 
-![alt text](image3.jpg)
+![alt text](image12.jpg)
 
 Once locked, the Phase-Locked Loop (PLL) reveals significant frequency jitter and non-linear drift. This "instability" is not random; it is a measurable Doppler shift.
 
