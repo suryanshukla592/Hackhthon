@@ -42,8 +42,8 @@ def pll_carrier_recovery(iq_samples, fs, initial_freq_guess):
 
 if __name__ == "__main__":
     # --- Configuration ---
-    fs = 2.0e6  # 2.0 MSps
-    initial_peak_hz = 433300.0  # Your Stage 1 detection
+    fs = 2.0e6  
+    initial_peak_hz = 433300.0  
     filename = 'C:/Users/LENOVO/OneDrive/Desktop/Hackathon/processed_iq_data/telemetry_baseband.bin'
     
     try:
