@@ -168,12 +168,12 @@ Once the signal is at baseband, we must decide *when* to sample it. Since the tr
 3. **Locking:** Utilize `Costas_loop.py` to achieve phase-lock.
 4. **Output:** Generate `Flattened_Baseband.py` data for final bit-decoding.
 
----
-# 🛰️ Stage II: Advanced Synchronization & optimal Baseband Conversion
+
+# 🛰️  Advanced Synchronization & optimal Baseband Conversion
 
 Building on initial detection and carrier frequency lock, the subsequent focus is on precise symbol clock alignment, frequency centering, and active phase synchronization. These processes eliminate residual Doppler jitter, achieving high-fidelity, sample-perfect alignment.
 
----
+
 
 ## 2.3 Precise Voyager Symbol Clock Extraction
 
