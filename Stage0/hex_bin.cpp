@@ -8,34 +8,44 @@
 #include <sstream>
 #include <algorithm>
 
+// This stores our signal data (I and Q parts)
 struct IQSample {
     float i;
     float q;
 };
 
+// Helper function to turn the hex strings from the file into actual float numbers
 float hexToFloat(const std::string& hexStr) {
-    // stoul handles "0x" automatically
+    // Convert hex string to a 32-bit integer first
     uint32_t rawBits = std::stoul(hexStr, nullptr, 16);
     float result;
+    // Copy the bits directly into a float variable
     std::memcpy(&result, &rawBits, sizeof(result));
     return result;
 }
 
 int main() {
+    // Where the data is and what we want to call the finished file
     std::string inputDirectory = "./dsn_data"; 
     std::string outputFilename = "telemetry_baseband.bin";
+    
+    // We use a map so the files automatically sort themselves by the timestamp
     std::map<uint64_t, std::string> sortedFiles;
 
     std::cout << "Scanning directory for mission data...\n";
 
+    // Standard code to open a folder and look inside
     DIR *dir;
     struct dirent *ent;
     if ((dir = opendir(inputDirectory.c_str())) != NULL) {
         while ((ent = readdir(dir)) != NULL) {
             std::string filename = ent->d_name;
+            
+            // Look for files that start with "dsn_capture_"
             if (filename.find("dsn_capture_") == 0) { 
                 size_t extPos = filename.find(".txt");
                 if (extPos != std::string::npos) {
+                    // Pull out the number part of the filename to use as a sort key
                     std::string tsStr = filename.substr(12, extPos - 12);
                     sortedFiles[std::stoull(tsStr)] = inputDirectory + "/" + filename;
                 }
@@ -49,7 +59,7 @@ int main() {
 
     std::cout << "Detected " << sortedFiles.size() << " files for processing.\n";
 
-    // Open file in binary mode (this will OVERWRITE the old small file)
+    // Open the output file in binary mode so we don't mess up the float data
     std::ofstream outFile(outputFilename, std::ios::binary);
     if (!outFile.is_open()) {
         std::cerr << "Error: Could not create output file!\n";
@@ -57,25 +67,29 @@ int main() {
     }
 
     int fileCount = 1;
+    // Go through the files one by one in the right order
     for (const auto& pair : sortedFiles) {
         std::ifstream inFile(pair.second);
         
-        // Progress bar so you know it's working
+        // Print progress so we know the program hasn't crashed
         std::cout << "Processing: [" << fileCount << "/" << sortedFiles.size() << "] " 
                   << pair.second << "...\r" << std::flush;
 
         std::string line;
         while (std::getline(inFile, line)) {
-            // Scrub commas
+            // Get rid of commas if the file has them
             std::replace(line.begin(), line.end(), ',', ' ');
             std::stringstream ss(line);
             std::string hexI, hexQ;
             
+            // If we successfully find two strings in the line...
             if (ss >> hexI >> hexQ) {
                 IQSample sample;
+                // Convert them and save them to our struct
                 sample.i = hexToFloat(hexI);
                 sample.q = hexToFloat(hexQ);
 
+                // Write the raw bytes of the struct to the binary file
                 outFile.write(reinterpret_cast<const char*>(&sample), sizeof(IQSample));
             }
         }
