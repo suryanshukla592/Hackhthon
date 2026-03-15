@@ -280,6 +280,22 @@ Once the hard decisions are processed across the entire captured frame, we can v
 | **Integrity** | High SNR (Signal-to-Noise Ratio) indicated by peak separation |
 
 ---
+# **Stage IV: Descrambling & Payload Recovery**
 
+The protocol for Stage IV has been fully executed. We have reached the terminal point of the data-layer reversal process.
+
+**✅ Completed Objectives**
+Reverse Transformations: All identified data-layer shifts from the transmitter have been systematically inverted.
+
+**Payload Extraction:** The raw data block has been successfully pulled from the stream.
+
+**⚠️ Current Output Analysis**
+Despite a successful recovery sequence, the resulting data is not yet coherent. The output is currently manifesting as partial signal noise.
+
+[SYSTEM_LOG]: Descrambling process reached 100%. Meaningful data extraction attempted. Result: High-entropy visual static detected. Signal fragment recovered, but resolution is obscured by noise floor.
+
+Visual Reference: Extracted Fragment
+[ATTACHMENT](image_13.jpeg)
+Note the high-density grain and horizontal banding at the header—this may indicate a secondary encryption layer or a synchronization mismatch.
 
 
