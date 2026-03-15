@@ -21,7 +21,7 @@ Pxx, freqs, bins, im = plt.specgram(signal_chunk, NFFT=nfft_size, Fs=fs, noverla
 plt.close() # We don't want to show this plot yet
 
 # 4. Extract the Peak Trace
-# Filter frequencies to only look near 433kHz
+# Filter frequencies to only look near 430kHz
 freq_mask = (freqs > target_freq - search_width) & (freqs < target_freq + search_width)
 filtered_freqs = freqs[freq_mask]
 filtered_Pxx = Pxx[freq_mask, :]
