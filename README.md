@@ -180,6 +180,8 @@ Building on initial detection and carrier frequency lock, the subsequent focus i
 Identifying and locking onto the exact symbol rate is paramount for error-free sampling. Deep-space probes typically include a clock-harmonic tone within their modulation to allow for high-precision synchronization.
 
 ![Final Symbol Clock Detection Spectrum](image4.jpg)
+
+
 *Figure 6: Magnitude Spectrum. The dominant spike at 10,000 Hz defines the definitive symbol rate of 10.0 kilobits per second (Kbps). Locking onto this precise tone ensures bit timing is synchronized with deep-space probe transmission.*
 
 ---
@@ -198,6 +200,7 @@ Following active carrier tracking, the high-frequency intermediate signal is shi
 Simultaneous phase lock (Costas Loop) and optimal bit boundary detection (Early-Late Gate) are achieved through nested feedback loops. This provides robust protection against phase noise and timing jitter.
 
 ![Costas & Clock Lock Diagnostics](image6.png)
+
 *Figure 8: Performance verification. Top Panel (Costas Loop): The two distinct and tight constellations at (-1, 0) and (+1, 0) prove a perfect BPSK phase-lock, effectively unwrapping the data from any residual carrier phase. Bottom Panel (Early-Late Gate): The red grid lines of the clock-recovery system are perfectly aligned with the signal peaks and bit-decision points (samples-per-symbol metric, SPS=200.03), confirming optimal symbol synchronization.*
 
 ---
