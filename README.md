@@ -217,3 +217,63 @@ Simultaneous phase lock (Costas Loop) and optimal bit boundary detection (Early-
 
 ---
 
+# 🛰️ Stage III: Demodulation & Bit Extraction
+
+With the carrier centered and the timing synchronized, **Stage III** focuses on converting the analog baseband samples into digital information. This involves identifying the modulation scheme, correcting symbol-level distortions, and making definitive "hard" decisions for each bit.
+
+---
+
+## 🎯 Objectives
+* **Modulation Identification:** Confirm the signaling method (e.g., BPSK).
+* **Distortion Correction:** Compensate for residual noise and phase offsets that "smear" symbol values.
+* **Hard Decision Logic:** Mapping soft analog voltages to discrete binary values ($0$ or $1$).
+
+---
+
+## 📉 3.1 Analyzing Signal Distortion
+
+Before compensation, the received signal is often a "cloud" of points where the noise power is comparable to the signal power. This makes it impossible to distinguish between a logical high or low.
+
+![Symbol Decision Histogram with Distortion](image_5faf62.png)
+*Figure 9: Initial Histogram. The unimodal distribution centered at zero indicates that noise and phase jitter have completely overlapped the symbols, preventing clear bit differentiation.*
+
+---
+
+## 💎 3.2 Bimodal Distribution & Clear Decision Boundaries
+
+By applying the phase and timing corrections from Stage II, the "cloud" collapses into two distinct clusters. This confirms that the modulation scheme is **BPSK (Binary Phase Shift Keying)**, where information is carried by $180^\circ$ phase shifts.
+
+![Bimodal Symbol Decision Histogram](image_5fafbd.png)
+*Figure 10: Corrected Bimodal Distribution. We now see two clear peaks centered near $-1.0$ and $+1.0$. The red dashed line represents the **Hard Decision Boundary ($0.0$)**.*
+
+### 🧠 Technical Theory: Hard Decisions
+A "Hard Decision" is a thresholding process. For BPSK:
+* If the symbol amplitude $x < 0.0$, the bit is decided as a **0**.
+* If the symbol amplitude $x > 0.0$, the bit is decided as a **1**.
+
+The distance from the peak to the $0.0$ boundary provides a "Soft Decision" value, which indicates the confidence level of that specific bit extraction.
+
+---
+
+## 🔢 3.3 Final Bitstream Statistics
+
+Once the hard decisions are processed across the entire captured frame, we can verify the balance of the received data. In a typical randomized data stream or spacecraft telemetry, the distribution of $0$s and $1$s should be relatively balanced.
+
+![Histogram of Hard Bits](image_5fac54.png)
+*Figure 11: Final Bit Count. The bar chart shows the total frequency of extracted bits. The slight variance between $0$ and $1$ counts is expected in short-duration telemetry frames.*
+
+---
+
+## 🛠️ Stage III Summary Table
+
+| Metric | Observation |
+| :--- | :--- |
+| **Modulation** | BPSK (2-Phase) |
+| **Decision Type** | Hard Thresholding at $0.0$ |
+| **Distortion State** | Corrected (Bimodal) |
+| **Integrity** | High SNR (Signal-to-Noise Ratio) indicated by peak separation |
+
+---
+
+**Next Step:** Would you like me to help you draft a **Stage IV: Frame Synchronization & Telemetry Decoding** section to handle the header detection and packet parsing?
+
