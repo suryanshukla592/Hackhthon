@@ -295,7 +295,7 @@ Despite a successful recovery sequence, the resulting data is not yet coherent. 
 [SYSTEM_LOG]: Descrambling process reached 100%. Meaningful data extraction attempted. Result: High-entropy visual static detected. Signal fragment recovered, but resolution is obscured by noise floor.
 
 Visual Reference: Extracted Fragment
-[ATTACHMENT](image_13.jpeg)
+[ATTACHMENT](image_13.jpg)
 Note the high-density grain and horizontal banding at the header—this may indicate a secondary encryption layer or a synchronization mismatch.
 
 
