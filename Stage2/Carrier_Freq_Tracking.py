@@ -41,7 +41,7 @@ def pll_carrier_recovery(iq_samples, fs, initial_freq_guess):
     return out_samples, freq_history
 
 if __name__ == "__main__":
-    # --- Configuration ---
+   
     fs = 2.0e6  
     initial_peak_hz = 433300.0  
     filename = 'C:/Users/LENOVO/OneDrive/Desktop/Hackathon/processed_iq_data/telemetry_baseband.bin'
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         print("Running Phase Locked Loop (PLL)...")
         baseband_iq, freq_track = pll_carrier_recovery(iq_chunk, fs, initial_peak_hz)
 
-        # --- Plot 1: Doppler Drift Tracking ONLY ---
+        # Plot 1: Doppler Drift Tracking
         time_axis = np.linspace(0, duration_sec, len(freq_track))
         
         plt.figure(figsize=(8, 5))
