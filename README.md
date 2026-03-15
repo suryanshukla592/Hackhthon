@@ -245,7 +245,7 @@ Before compensation, the received signal is often a "cloud" of points where the 
 
 By applying the phase and timing corrections from Stage II, the "cloud" collapses into two distinct clusters. This confirms that the modulation scheme is **BPSK (Binary Phase Shift Keying)**, where information is carried by $180^\circ$ phase shifts.
 
-![Bimodal Symbol Decision Histogram](image_7.jpeg)
+![Bimodal Symbol Decision Histogram](image7.jpeg)
 *Figure 10: Corrected Bimodal Distribution. We now see two clear peaks centered near $-1.0$ and $+1.0$. The red dashed line represents the **Hard Decision Boundary ($0.0$)**.*
 
 ### 🧠 Technical Theory: Hard Decisions
