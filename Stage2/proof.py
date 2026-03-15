@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 # 1. Mission Parameters
 fs = 2.0e6
 filename = "telemetry_baseband.bin"
-target_freq = 433000  # The peak you found earlier
-zoom_width = 30000    # Widened the zoom to be safe
+target_freq = 433000  
+zoom_width = 30000    
 
 # 2. Loading Data
 data = np.memmap(filename, dtype=np.complex64, mode='r')
 
-# Let's try seconds 30 to 50 (sometimes the start is messy)
+# Let's try seconds 30 to 50 
 start_sec = 30.0
 end_sec = 50.0
 start_idx = int(start_sec * fs)
@@ -33,14 +33,11 @@ Pxx, freqs, bins, im = plt.specgram(
     cmap='magma'
 )
 
-# --- AUTO-BRIGHTNESS LOGIC ---
-# We calculate the 10th percentile (noise) and 99.9th percentile (peak)
-# This forces the signal to stand out regardless of your PC's power levels.
+#AUTO-BRIGHTNESS LOGIC
 data_db = 10 * np.log10(Pxx)
 auto_vmin = np.percentile(data_db, 10)
 auto_vmax = np.percentile(data_db, 99.9)
 im.set_clim(vmin=auto_vmin, vmax=auto_vmax)
-# -----------------------------
 
 plt.title(f"Voyager-X Carrier Search (Time: {start_sec}s - {end_sec}s)", fontsize=16)
 plt.xlabel("Time (Seconds)", fontsize=12)
