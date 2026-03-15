@@ -2,18 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
 
-# --- 1. CONFIGURATION ---
+#  1. CONFIGURATION 
 fs = 2.0e6
 filename = "telemetry_baseband.bin"
 data = np.memmap(filename, dtype=np.complex64, mode='r')
 # 5 seconds is plenty for this refined method
 signal = data[0:int(5 * fs)] 
 
-# --- 2. COARSE SHIFT & PRE-FILTER (The Fix) ---
+# 2. COARSE SHIFT & PRE-FILTER (The Fix)
 print("Step 1: Coarse shift to baseband...")
 t = np.arange(len(signal)) / fs
-# Blindly shift down by 432,999 Hz
-coarse_nco = np.exp(-1j * 2 * np.pi * 432999.0 * t)
+
+coarse_nco = np.exp(-1j * 2 * np.pi * 430000.0 * t)
 coarse_baseband = signal * coarse_nco
 
 print("Step 2: Pre-filtering noise...")
@@ -26,11 +26,11 @@ def butter_lowpass(cutoff, fs, order=5):
 # Squeeze the bandwidth down to +/- 15kHz. The noise is now gone.
 clean_signal = butter_lowpass(15000, fs)
 
-# --- 3. FINE COSTAS LOOP ---
+# 3. FINE COSTAS LOOP 
 print("Step 3: Engaging Fine Costas Loop...")
 phase_est = 0.0
-freq_est = 0.0 # Starting at 0 because we already did the coarse shift
-loop_bw = 0.005 # Tighter, smoother loop
+freq_est = 0.0 
+loop_bw = 0.005
 alpha = np.sqrt(2) * loop_bw
 beta = loop_bw**2
 
@@ -40,7 +40,7 @@ for i in range(len(clean_signal)):
     nco = np.exp(-1j * phase_est)
     baseband_out[i] = clean_signal[i] * nco
     
-    # Error detector now works flawlessly because the noise is gone
+   
     error = np.real(baseband_out[i]) * np.imag(baseband_out[i])
     
     phase_est += (freq_est * 2 * np.pi / fs) + (alpha * error)
@@ -49,12 +49,11 @@ for i in range(len(clean_signal)):
 
 print("Lock complete.")
 
-# --- 4. CLOCK RECOVERY ---
+# 4. CLOCK RECOVERY
 print("Step 4: Extracting Symbol Clock...")
 locked_segment = baseband_out[int(2.0 * fs):]
 
-# Because we filtered the signal, the symbol transitions are smooth.
-# Squaring the magnitude highlights these transitions perfectly.
+
 clock_energy = np.abs(locked_segment)**2
 clock_energy -= np.mean(clock_energy)
 
@@ -72,7 +71,7 @@ print(f"TRUE SYMBOL RATE: {symbol_rate:,.2f} Hz")
 print(f"SAMPLES/SYMBOL:   {fs/symbol_rate:.2f}")
 print("="*45)
 
-# --- 5. VISUAL VERIFICATION ---
+#  5. VISUAL VERIFICATION 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
 # Plot 1: The BPSK Constellation
