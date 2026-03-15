@@ -219,6 +219,8 @@ Simultaneous phase lock (Costas Loop) and optimal bit boundary detection (Early-
 
 # 🛰️ Stage III: Demodulation & Bit Extraction
 
+In this problem statement, we utilize Binary Phase Shift Keying (BPSK) as our primary modulation scheme.As in the I vs Q (Constellation) graph we are getting two different clusters.
+
 With the carrier centered and the timing synchronized, **Stage III** focuses on converting the analog baseband samples into digital information. This involves identifying the modulation scheme, correcting symbol-level distortions, and making definitive "hard" decisions for each bit.
 
 ---
@@ -234,7 +236,7 @@ With the carrier centered and the timing synchronized, **Stage III** focuses on 
 
 Before compensation, the received signal is often a "cloud" of points where the noise power is comparable to the signal power. This makes it impossible to distinguish between a logical high or low.
 
-![Symbol Decision Histogram with Distortion](image_5faf62.png)
+![Symbol Decision Histogram with Distortion](image8.jpg)
 *Figure 9: Initial Histogram. The unimodal distribution centered at zero indicates that noise and phase jitter have completely overlapped the symbols, preventing clear bit differentiation.*
 
 ---
@@ -243,7 +245,7 @@ Before compensation, the received signal is often a "cloud" of points where the 
 
 By applying the phase and timing corrections from Stage II, the "cloud" collapses into two distinct clusters. This confirms that the modulation scheme is **BPSK (Binary Phase Shift Keying)**, where information is carried by $180^\circ$ phase shifts.
 
-![Bimodal Symbol Decision Histogram](image_5fafbd.png)
+![Bimodal Symbol Decision Histogram](image_7.jpg)
 *Figure 10: Corrected Bimodal Distribution. We now see two clear peaks centered near $-1.0$ and $+1.0$. The red dashed line represents the **Hard Decision Boundary ($0.0$)**.*
 
 ### 🧠 Technical Theory: Hard Decisions
@@ -259,7 +261,7 @@ The distance from the peak to the $0.0$ boundary provides a "Soft Decision" valu
 
 Once the hard decisions are processed across the entire captured frame, we can verify the balance of the received data. In a typical randomized data stream or spacecraft telemetry, the distribution of $0$s and $1$s should be relatively balanced.
 
-![Histogram of Hard Bits](image_5fac54.png)
+![Histogram of Hard Bits](image9.jpg)
 *Figure 11: Final Bit Count. The bar chart shows the total frequency of extracted bits. The slight variance between $0$ and $1$ counts is expected in short-duration telemetry frames.*
 
 ---
@@ -275,5 +277,5 @@ Once the hard decisions are processed across the entire captured frame, we can v
 
 ---
 
-**Next Step:** Would you like me to help you draft a **Stage IV: Frame Synchronization & Telemetry Decoding** section to handle the header detection and packet parsing?
+
 
