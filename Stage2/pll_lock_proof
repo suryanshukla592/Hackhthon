@@ -1,0 +1,83 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import butter, lfilter
+
+fs = 2e6                  
+symbol_rate = 10000       
+sps = int(fs / symbol_rate)
+filename = "telemetry_baseband.bin"
+
+print("1. Loading raw telemetry data...")
+data = np.memmap(filename, dtype=np.complex64, mode='r')
+signal = data[0:int(5.0 * fs)]  
+
+print("2. Applying Coarse Frequency Shift (430 kHz)...")
+t = np.arange(len(signal)) / fs
+coarse_nco = np.exp(-1j * 2 * np.pi * 430000 * t)
+coarse_baseband = signal * coarse_nco
+
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low')
+    return lfilter(b, a, coarse_baseband)
+
+clean_signal = butter_lowpass(15000, fs)
+
+print("3. Engaging Costas Loop (Fine Phase Lock)...")
+phase_est = 0.0
+freq_est = 0.0
+loop_bw = 0.005
+alpha = np.sqrt(2) * loop_bw
+beta = loop_bw**2
+baseband_out = np.zeros(len(clean_signal), dtype=np.complex64)
+
+for i in range(len(clean_signal)):
+    nco = np.exp(-1j * phase_est)
+    baseband_out[i] = clean_signal[i] * nco
+    error = np.real(baseband_out[i]) * np.imag(baseband_out[i])
+    phase_est += (freq_est * 2 * np.pi / fs) + (alpha * error)
+    freq_est += (beta * error * fs / (2 * np.pi))
+    phase_est %= 2 * np.pi
+
+print("4. Applying Boxcar (Integrate-and-Dump) Filter...")
+rect_kernel = np.ones(sps) / sps
+integrated_signal = np.convolve(np.real(baseband_out), rect_kernel, mode='same')
+
+best_offset = 0
+max_abs_mean = 0
+for trial in range(sps):
+    sample_test = integrated_signal[int(4.0*fs) + trial::sps]
+    metric = np.mean(np.abs(sample_test))
+    if metric > max_abs_mean:
+        max_abs_mean = metric
+        best_offset = trial
+
+print(f"Optimal Sampling Offset: {best_offset}")
+sampled_symbols = integrated_signal[int(4.0*fs) + best_offset::sps]
+
+plt.figure(figsize=(12,5))
+plt.subplot(1,2,1)
+plt.scatter(sampled_symbols.real, sampled_symbols.imag, s=1, alpha=0.5, color='blue')
+plt.axhline(0, color='red', linestyle='--', alpha=0.3)
+plt.axvline(0, color='red', linestyle='--', alpha=0.3)
+plt.title("Constellation Diagram")
+plt.xlabel("In-Phase (I)")
+plt.ylabel("Quadrature (Q)")
+plt.axis('equal')
+plt.grid(True, alpha=0.2)
+
+plt.subplot(1,2,2)
+num_eyes = 1000
+trace_len = sps*2
+start_idx = int(4.0*fs)
+for i in range(num_eyes):
+    seg = integrated_signal[start_idx + i*sps : start_idx + i*sps + trace_len]
+    if len(seg) == trace_len:
+        plt.plot(seg, color='purple', alpha=0.05)
+plt.title("Eye Diagram")
+plt.xlabel("Samples per Symbol")
+plt.ylabel("Amplitude")
+plt.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.show()
